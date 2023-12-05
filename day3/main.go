@@ -48,7 +48,7 @@ func PartOne() {
 }
 
 type Point struct {
-	x, y int
+	y, x int
 }
 
 func PartTwo() {
@@ -61,10 +61,11 @@ func PartTwo() {
 	lines = lines[:len(lines)-1]
 	var sum int
 	digitStack := ""
+	adjacentDigitsStack := make([]Point, 0)
+	adjacentDigitsToValue := make(map[Point]int)
+	countedStar := make(map[Point]bool)
 	isAdjacent := false
-	// mapping of 2d star location to its adjacent numbers
-	adjacentStar := make(map[Point][]int)
-	adjacentStar[Point{1, 1}] = []int{1}
+	adjacentStar := make(map[Point][]Point)
 	for row, line := range lines {
 		for col, ch := range line {
 			if unicode.IsDigit(ch) {
@@ -73,20 +74,36 @@ func PartTwo() {
 					for y := -1; y < 2; y++ {
 						if X, Y := col+x, row+y; X >= 0 && X < len(line) &&
 							Y >= 0 && Y < len(lines) &&
-							!unicode.IsDigit([]rune(lines[Y])[X]) &&
-							[]rune(lines[Y])[X] != '.' {
+							[]rune(lines[Y])[X] == '*' {
+							adjacentDigitsStack = append(adjacentDigitsStack, Point{row, col})
 							isAdjacent = true
+							if _, counted := countedStar[Point{Y, X}]; !counted {
+								if _, has := adjacentStar[Point{Y, X}]; !has {
+									adjacentStar[Point{Y, X}] = make([]Point, 0)
+								}
+								adjacentStar[Point{Y, X}] = append(adjacentStar[Point{Y, X}], Point{row, col})
+								countedStar[Point{Y, X}] = true
+							}
 						}
 					}
 				}
 			} else {
 				if digitStack != "" && isAdjacent {
 					val, _ := strconv.Atoi(digitStack)
-					sum += val
+					for _, p := range adjacentDigitsStack {
+						adjacentDigitsToValue[p] = val
+					}
 				}
 				digitStack = ""
+				adjacentDigitsStack = make([]Point, 0)
+				countedStar = make(map[Point]bool)
 				isAdjacent = false
 			}
+		}
+	}
+	for _, arr := range adjacentStar {
+		if len(arr) == 2 {
+			sum += adjacentDigitsToValue[arr[0]] * adjacentDigitsToValue[arr[1]]
 		}
 	}
 	fmt.Println(sum)
@@ -94,4 +111,5 @@ func PartTwo() {
 
 func main() {
 	PartOne()
+	PartTwo()
 }

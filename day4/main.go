@@ -5,17 +5,8 @@ import (
 	"log"
 	"math"
 	"os"
-	"strconv"
 	"strings"
 )
-
-func stringArrToAtoi(arr []string) (out []int) {
-	for _, el := range arr {
-		val, _ := strconv.Atoi(el)
-		out = append(out, val)
-	}
-	return out
-}
 
 func main() {
 	bytes, err := os.ReadFile("input.txt")
@@ -40,6 +31,7 @@ func main() {
 		count := 0
 		for _, drawn := range drawnDig {
 			for _, winning := range winningDig {
+				// string comparison cuz why not
 				if drawn == winning {
 					count += 1
 				}
